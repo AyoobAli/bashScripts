@@ -1,0 +1,113 @@
+#!/bin/bash
+#
+# Script Name    : xenc
+#
+# Author         : Ayoob Ali (https://www.AyoobAli.com)
+# Date           : 27-02-2018
+#
+# Description    : xenc uses OpenSSL to Encrypt/Decrypt files
+#
+# Requirement    : openssl
+#
+# Run Information: xenc -h
+#
+
+optString=":hdxf:p:"
+optMandatory=true
+filePath=""
+defile="no"
+ishelp=""
+keypass=""
+delorg="no"
+
+showHelp () {
+    echo "Usage: `basename $0` [Options]";
+    echo "
+    Available Options:
+        -h                  Show help
+        -d                  Decrypt a file
+        -f FILE_PATH        File path to Encryption/Decryption
+        -p Password         Encryption/Decryption Password
+        -x                  Delete original file after Encrypting/Decrypting
+    "
+    exit
+}
+
+if ( ! getopts "$optString" opt && "$optMandatory" -eq true); then
+    showHelp
+fi
+
+while getopts "$optString" opt; do
+    case $opt in
+        f) filePath="$OPTARG";;
+        d) defile="yes";;
+        p) keypass="$OPTARG";;
+        x) delorg="yes";;
+        h) ishelp="yes";;
+    esac
+done
+
+if [[ "$ishelp" == 'yes' || -z "$filePath" ]] ; then
+    showHelp
+fi
+
+
+if [[ ! -f "$filePath" ]]; then
+    echo "File not found!"
+    exit
+fi
+
+if [[ "$defile" == 'no' ]]; then
+    if [ -f "$filePath.xenc" ]; then
+        echo "Encrypted file already exist."
+        exit
+    fi
+
+    if [[ -z "$keypass" ]] ; then
+        echo -n "Encryption Password: "
+        read -s keypass
+        echo ""
+    fi
+
+    echo "Encrypting $filePath..."
+    opsll=`openssl aes-256-cbc -in "$filePath" -out "$filePath.xenc" -k "$keypass" 2> /dev/null`
+
+    if [[ $? -eq 0 ]]; then
+        echo "File Encrypted: $filePath.xenc"
+        if [[ "$delorg" == 'yes' ]]; then
+            rm "$filePath"
+        fi
+    else
+        rm "$filePath.xenc"
+        echo "Can't Encrypt the file."
+    fi
+
+elif [[ "$defile" == 'yes' ]]; then
+    flen=${#filePath}-5
+    if [[ -f "${filePath:0:$flen}" ]] || [[ "${filePath: -5}" != '.xenc' ]]; then
+        echo "File Already exist OR incorrect encrypted file."
+        exit
+    fi
+
+    if [[ -z "$keypass" ]] ; then
+        echo -n "Decryption Password: "
+        read -s keypass
+        echo ""
+    fi
+    
+    echo "Decrypting $filePath..."
+    opsll=`openssl aes-256-cbc -d -in "$filePath" -out "${filePath:0:$flen}" -k "$keypass" 2> /dev/null`
+
+    if [[ $? -eq 0 ]]; then
+        echo "File Decrypted: ${filePath:0:$flen}"
+        if [[ "$delorg" == 'yes' ]]; then
+            rm "$filePath"
+        fi
+    else
+        rm "${filePath:0:$flen}"
+        echo "Can't Decrypt the file."
+    fi
+
+else
+    showHelp
+fi
