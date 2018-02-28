@@ -65,7 +65,7 @@ if [[ "$defile" == 'no' ]]; then
 
     if [[ -z "$keypass" ]] ; then
         echo -n "Encryption Password: "
-        read -s keypass
+        read -rs keypass
         echo ""
     fi
 
@@ -91,7 +91,7 @@ elif [[ "$defile" == 'yes' ]]; then
 
     if [[ -z "$keypass" ]] ; then
         echo -n "Decryption Password: "
-        read -s keypass
+        read -rs keypass
         echo ""
     fi
     
