@@ -1,0 +1,52 @@
+#!/bin/bash
+
+#                     .....
+#                 _d^^^^^^^^^b_                          {|}-{Name}{Ayoob Ali}
+#              .d''           ``b.           ,--{Author}-{|}-{Email}{-}
+#            .p'                 `q.        //           {|}-{Website}{https://ayoob.ae}
+#           .d'                   `b.      //
+#          .d'                     `b.    //
+#          ::         DNSall        ::   //   {Version}{v1.1.0}-{Date}{27-08-2024}
+#          ::  ...................  ::=={0}--{ 
+#          ::                       ::   \\   {License}{Public Domain}
+#          `p.                     .q'    \\
+#           `p.                   .q'      \\                  
+#            `b.                 .d'        \\                {    A tool to get all DNS     }
+#              `q..          ..p'            `--{Description}-{   records from a Hostname    }
+#                 ^q........p^                                {                              }
+#                     ''''
+#
+# DEPENDENCIES: mysqldump openssl base64
+
+
+dns_types1="A AAAA CNAME MX NS TXT PTR SOA SRV"
+dns_types2="AFSDB APL CAA CDNSKEY CDS CERT CSYNC DCHID DHCID DLV DNAME DNSKEY DS EUI48 EUI64 HINFO HIP HTTPS IPSECKEY KEY KX LOC NAPTR NSEC NSEC3 NSEC3PARAM OPENPGPKEY RP RRSIG SIG SMIMEA SSHFP SVCB TA TKEY TLSA TSIG URI WALLET ZONEMD MD MF MAILA MB MG MR MINFO MAILB WKS NB NBSTAT NULL A6 NXT X25 ISDN RT NSAP NSAP-PTR PX EID NIMLOC ATMA SINK GPOS UINFO UID GID UNSPEC SPF NINFO RKEY TALINK NID L32 L64 LP DOA"
+
+if [ ! -z "$1" ]; then
+
+    for dType in $dns_types1; do
+        records=""
+        records=`dig "$1" "$dType" +short`
+        if [ ! -z "$records" ]; then
+            echo -e "\e[1;92m$1 - ($dType) Records:\e[0m"
+            echo "$records"
+            echo ""
+        fi
+    done
+
+    if [ ! -z "$2" ]; then
+
+        for dType in $dns_types2; do
+            records=""
+            records=`dig "$1" "$dType" +short`
+            if [ ! -z "$records" ]; then
+                echo -e "\e[1;92m$1 - ($dType) Records:\e[0m"
+                echo "$records"
+                echo ""
+            fi
+        done
+    fi
+
+else
+    echo -e "\e[1;93mUsage: `basename $0` <Hostname> [Full_list]\e[0m"
+fi
